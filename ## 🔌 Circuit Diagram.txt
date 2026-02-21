@@ -1,0 +1,27 @@
+## 🔌 Circuit Diagram
+
+Connect the two Arduinos directly using jumper wires. No external resistors or capacitors are needed for basic operation, as the protocol uses internal pull-ups where necessary.
+
+      ARDUINO A (Sender/Receiver)                 ARDUINO B (Sender/Receiver)
+     +---------------------------+               +---------------------------+
+     |                           |               |                           |
+     |                Clock (S1) |               | Clock (S1)                |
+     |                      D13  |==============>|  D13                      |
+     |                           |               |                           |
+     |               Status (S2) |               | Status (S2)               |
+     |                      D12  |<==============|  D12                      |
+     |                           |               |                           |
+     |                  Data (X) |               | Data (X)                  |
+     |                       D6  |==============>|  D6                       |
+     |                           |               |                           |
+     |          Inverse (X-Bar)  |               | Inverse (X-Bar)           |
+     |                       D5  |==============>|  D5                       |
+     |                           |               |                           |
+     |             Common Ground |               | Common Ground             |
+     |                      GND  |---------------|  GND                      |
+     |                           |               |                           |
+     +---------------------------+               +---------------------------+
+
+* Arrows indicate the direction of data flow when Arduino A is the active Sender. 
+* The flow completely reverses during the recursive error-correction phase.
+* WARNING: The GND to GND connection is mandatory. Without it, the HIGH/LOW voltage readings will float and cause constant errors.
