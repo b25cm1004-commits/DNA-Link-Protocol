@@ -42,7 +42,7 @@ void loop() {
 
     if (cmd.indexOf('@') != -1) {
       Serial.println(F("\n--- SENDER MODE ACTIVE ---"));
-      Serial.println(F("Type text to send. Type '!' to exit."));
+      Serial.println(F("Type text to send. Type a solo '!' and press Enter to exit."));
 
       pinMode(13, OUTPUT);
       digitalWrite(13, HIGH);  
@@ -56,27 +56,21 @@ void loop() {
           String strToSend = reading();
           
           if (strToSend.length() > 0) {
+            // Create a clean copy just to check if it's a solo '!'
+            String checkStr = strToSend;
+            checkStr.trim(); 
             
-            if (strToSend.indexOf('!') != -1) {
-              // Extract any text typed BEFORE the '!' and send it first
-              String msg = strToSend.substring(0, strToSend.indexOf('!'));
-              if (msg.length() > 0) {
-                // Force a newline if it doesn't have one
-                if (msg.indexOf('\n') == -1) msg += '\n';
-                sendfun(msg);
-              }
-              
-              sendfun("!"); // Send the exit command to receiver
+            if (checkStr == "!") {
+              // User typed a solo '!'. Send the hidden End-Of-Transmission byte (ASCII 4)
+              sendfun(String((char)4)); 
               active = false; // Exit sender mode
-              
             } else {
-              // Normal text sending: ensure it always has a newline attached
+              // Normal text sending (can safely contain '!')
               if (strToSend.indexOf('\n') == -1) {
-                strToSend += '\n';
+                strToSend += '\n'; // Guarantee a newline at the end
               }
               sendfun(strToSend);
             }
-            
           }
         }
       }
@@ -101,11 +95,13 @@ void loop() {
 
         char c = translate(read_byte);
 
-        if (c == '!') {
+        // Check for the hidden End-Of-Transmission byte (ASCII 4)
+        if (c == 4) {
           Serial.println();  
           break;
         }
 
+        // Print normally! (Exclamation marks will print just fine)
         Serial.print(c);
       }
     }
@@ -238,7 +234,7 @@ int recievefun(int* read_byte, int* error_bits) {
     return 1;
   } else {
     digitalWrite(12, LOW);  
-    delay(500);             // INCREASED: 0.5 second gap to let physical connection restore
+    delay(500);             // 0.5 second gap to let physical connection restore
     errorfun(read_byte, error_bits, k);
     return 0; 
   }
@@ -293,7 +289,7 @@ int errorcorr(int* bitVal) {
     // 2. Sender safely re-sends the entire original byte. 
     // The receiver will use its own mask to pluck out only the bits it needs!
     send_8bits(bitVal);
-    //Serial.println(F("\n[Network healed] Error corrected dynamically."));
+    Serial.println(F("\n[Network healed] Error corrected dynamically."));
   }
 
   return 0;
