@@ -289,7 +289,7 @@ int errorcorr(int* bitVal) {
     // 2. Sender safely re-sends the entire original byte. 
     // The receiver will use its own mask to pluck out only the bits it needs!
     send_8bits(bitVal);
-    Serial.println(F("\n[Network healed] Error corrected dynamically."));
+    //Serial.println(F("\n[Network healed] Error corrected dynamically."));
   }
 
   return 0;
